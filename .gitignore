@@ -1,0 +1,12 @@
+# Weights
+weights/
+test/
+test_finetune_weights/
+test_recon/
+
+
+# model
+#
+*.npz
+*.pkl
+
