@@ -4,11 +4,13 @@ from lasagne.layers import Conv2DLayer as ConvLayer
 from lasagne.layers import Pool2DLayer as PoolLayer
 from lasagne.nonlinearities import softmax
 import lasagne
+from layers import RGBtoBGRLayer
+import theano.tensor as T
 import numpy as np
 import pickle
 from constants import *
-IMAGE_W = 600
 
+MEAN_VALUES = np.array([104, 117, 123])
 # Note: tweaked to use average pooling instead of maxpooling
 def build_model(height, width, input_var):
     net = {}
@@ -56,7 +58,7 @@ def build_model(height, width, input_var):
     net['conv4_4_s'].params[net['conv4_4_s'].W].remove('trainable')
     net['conv4_4_s'].params[net['conv4_4_s'].b].remove('trainable')
     net['pool4_s'] = PoolLayer(net['conv4_4_s'], 2, mode='average_exc_pad')
-    
+    '''
     net['conv5_1_s'] = ConvLayer(net['pool4_s'], 512, 3, pad=1, flip_filters=False)
     net['conv5_1_s'].params[net['conv5_1_s'].W].remove('trainable')
     net['conv5_1_s'].params[net['conv5_1_s'].b].remove('trainable')
@@ -70,12 +72,15 @@ def build_model(height, width, input_var):
     net['conv5_4_s'].params[net['conv5_4_s'].W].remove('trainable')
     net['conv5_4_s'].params[net['conv5_4_s'].b].remove('trainable')
     net['pool5_s'] = PoolLayer(net['conv5_4_s'], 2, mode='average_exc_pad')
-    
+    '''
     return net
     
 def connect(net):
   #  net['input_s'] = InputLayer((1, 3, IMAGE_W, IMAGE_W))
-    net['conv1_1_s'] = ConvLayer(net['output_encoder'], 64, 3, pad=1, flip_filters=False)
+    net['bgr_s'] = RGBtoBGRLayer(net['output_encoder_scaled'], bgr_mean=MEAN_VALUES, data_format='bc01')
+    print "bgr_s: {}".format(net['bgr_s'].output_shape[1:])
+    
+    net['conv1_1_s'] = ConvLayer(net['bgr_s'], 64, 3, pad=1, flip_filters=False)
     net['conv1_1_s'].params[net['conv1_1_s'].W].remove('trainable')
     net['conv1_1_s'].params[net['conv1_1_s'].b].remove('trainable')
     net['conv1_2_s'] = ConvLayer(net['conv1_1_s'], 64, 3, pad=1, flip_filters=False)
@@ -118,7 +123,7 @@ def connect(net):
     net['conv4_4_s'].params[net['conv4_4_s'].W].remove('trainable')
     net['conv4_4_s'].params[net['conv4_4_s'].b].remove('trainable')
     net['pool4_s'] = PoolLayer(net['conv4_4_s'], 2, mode='average_exc_pad')
-    
+    '''  
     net['conv5_1_s'] = ConvLayer(net['pool4_s'], 512, 3, pad=1, flip_filters=False)
     net['conv5_1_s'].params[net['conv5_1_s'].W].remove('trainable')
     net['conv5_1_s'].params[net['conv5_1_s'].b].remove('trainable')
@@ -132,7 +137,7 @@ def connect(net):
     net['conv5_4_s'].params[net['conv5_4_s'].W].remove('trainable')
     net['conv5_4_s'].params[net['conv5_4_s'].b].remove('trainable')
     net['pool5_s'] = PoolLayer(net['conv5_4_s'], 2, mode='average_exc_pad')
-    
+    '''
     return net
 
 def load_weights(net):
@@ -140,8 +145,9 @@ def load_weights(net):
     values = pickle.load(open('vgg19_normalized.pkl'))['param values']
     layers = ['conv1_1_s', 'conv1_2_s', 'conv2_1_s', 'conv2_2_s',
               'conv3_1_s', 'conv3_2_s', 'conv3_3_s', 'conv3_4_s', 
-              'conv4_1_s', 'conv4_2_s', 'conv4_3_s', 'conv4_4_s', 
-              'conv5_1_s', 'conv5_2_s', 'conv5_3_s', 'conv5_4_s']
+              'conv4_1_s', 'conv4_2_s', 'conv4_3_s', 'conv4_4_s']
+
+              #'conv5_1_s', 'conv5_2_s', 'conv5_3_s', 'conv5_4_s']
     layers = [ net[k].get_params() for k in layers]
 
     for i in range(len(layers)):
@@ -150,7 +156,6 @@ def load_weights(net):
             layers[i][1].set_value(values[i*2+1])
     #lasagne.layers.set_all_param_values(layers.values(), values)
 
-MEAN_VALUES = np.array([104, 117, 123]).reshape((3,1,1))
 
 def prep_image(im):
     if len(im.shape) == 2:
@@ -174,14 +179,27 @@ def prep_image(im):
     # Convert RGB to BGR
     im = im[::-1, :, :]
 
-    im = im - MEAN_VALUES
-    return im[np.newaxis]
+    im = im - MEAN_VALUES.reshape(3,1,1)
+    return im
 
-def content_loss(P, X, layer):
-    p = P[layer]
-    x = X[layer]
-    
-    loss = 1./2 * ((x - p)**2).sum()
+def gram_matrix(x):
+    x = x.flatten(ndim=3)
+    g = T.tensordot(x, x, axes=([2], [2]))
+    return g
+def content_loss(P, X):
+    distance = lasagne.objectives.squared_error(P, X)    
+    loss = 1./2 * distance.sum()
     return loss
 
+def style_loss(a, x):
+                
+    A = gram_matrix(a)
+    G = gram_matrix(x)
+                        
+    N = a.shape[1]
+    M = a.shape[2] * a.shape[3]
+    
+    distance = lasagne.objectives.squared_error(G, A)
+    loss = 1./(4 * N**2 * M**2) * distance.sum()
+    return loss
 
