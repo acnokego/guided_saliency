@@ -22,16 +22,14 @@ salmap_size = INPUT_SIZE
 # Resize train/validation files
 
 listImgFiles = [k.split('/')[-1].split('.')[0] for k in glob.glob(os.path.join(pathToMaps, '*'))]
-#listTestImages = [k.split('/')[-1].split('.')[0] for k in glob.glob(os.path.join(pathToImages, '*test*'))]
+listTestImages = [k.split('/')[-1].split('.')[0] for k in glob.glob(os.path.join(pathToTestMaps, '*'))]
 
 for currFile in tqdm(listImgFiles):
-    imageFile = 'COCO'+currFile[2:]
-    tt = dataRepresentation.Target(os.path.join(pathToImages, imageFile + '.jpg'),
+    #imageFile = 'COCO'+currFile[2:]
+    tt = dataRepresentation.Target(os.path.join(pathToImages, currFile + '.jpg'),
                                    os.path.join(pathToMaps, currFile + '.jpg'),
-                                    0,
                                    dataRepresentation.LoadState.loaded, dataRepresentation.InputType.image,
-                                   dataRepresentation.LoadState.loaded, dataRepresentation.InputType.imageGrayscale,
-                                   dataRepresentation.LoadState.unloaded, dataRepresentation.InputType.empty)
+                                   dataRepresentation.LoadState.loaded, dataRepresentation.InputType.imageGrayscale)
 
     # if tt.image.getImage().shape[:2] != (480, 640):
     #    print 'Error:', currFile
@@ -46,36 +44,37 @@ for currFile in tqdm(listImgFiles):
 # # Resize test files
 '''
 for currFile in tqdm(listTestImages):
+    #imageFile = 'COCO'+currFile[2:]
     tt = dataRepresentation.Target(os.path.join(pathToImages, currFile + '.jpg'),
-                                   os.path.join(pathToMaps, currFile + '.mat'),
-                                   os.path.join(pathToFixationMaps, currFile + '.mat'),
+                                   os.path.join(pathToTestMaps, currFile + '.jpg'),
                                    dataRepresentation.LoadState.loaded,dataRepresentation.InputType.image,
-                                   dataRepresentation.LoadState.unloaded, dataRepresentation.InputType.empty,
-                                   dataRepresentation.LoadState.unloaded, dataRepresentation.InputType.empty)
+                                   dataRepresentation.LoadState.loaded, dataRepresentation.InputType.imageGrayscale
+                                   )
 
     imageResized = cv2.cvtColor(cv2.resize(tt.image.getImage(), img_size, interpolation=cv2.INTER_AREA),
                                 cv2.COLOR_RGB2BGR)
-    cv2.imwrite(os.path.join(pathOutputImages, currFile + '.png'), imageResized)
+    saliencyResized = cv2.resize(tt.saliency.getImage(), salmap_size, interpolation=cv2.INTER_AREA)
+    cv2.imwrite(os.path.join(pathOutputTestImages, currFile + '.png'), imageResized)
+    cv2.imwrite(os.path.join(pathOutputTestMaps, currFile + '.png'), saliencyResized)
 '''
 
 # LOAD DATA
 
 # Train
-
-listFilesTrain = [k for k in listImgFiles if 'train' in k]
+print('FINISH LOADING!!!')
+#listFilesTrain = [k for k in listImgFiles if 'train' in k]
 trainData = []
-for currFile in tqdm(listFilesTrain):
+for currFile in tqdm(listImgFiles):
     trainData.append(dataRepresentation.Target(os.path.join(pathOutputImages, currFile + '.png'),
                                                os.path.join(pathOutputMaps, currFile + '.png'),
-                                               0,
                                                dataRepresentation.LoadState.loaded, dataRepresentation.InputType.image,
-                                               dataRepresentation.LoadState.loaded, dataRepresentation.InputType.imageGrayscale,
-                                               dataRepresentation.LoadState.unloaded, dataRepresentation.InputType.empty))
+                                               dataRepresentation.LoadState.loaded, dataRepresentation.InputType.imageGrayscale))
 
-with open(os.path.join(pathToPickle, 'trainData.pickle'), 'wb') as f:
+with open(os.path.join(pathToPickle, 'realData_resize_pool2gs.pickle'), 'wb') as f:
     pickle.dump(trainData, f)
 
 # Validation
+
 '''
 listFilesValidation = [k for k in listImgFiles if 'val' in k]
 validationData = []
@@ -89,18 +88,19 @@ for currFile in tqdm(listFilesValidation):
 
 with open(os.path.join(pathToPickle, 'validationData.pickle'), 'wb') as f:
     pickle.dump(validationData, f)
-
-# Test
-
+'''
+#Test
+'''
 testData = []
 
 for currFile in tqdm(listTestImages):
-    testData.append(dataRepresentation.Target(os.path.join(pathOutputImages, currFile + '.png'),
-                                              os.path.join(pathOutputMaps, currFile + '.png'),
+    testData.append(dataRepresentation.Target(os.path.join(pathOutputTestImages, currFile + '.png'),
+                                              os.path.join(pathOutputTestMaps, currFile + '.png'),
                                               dataRepresentation.LoadState.loaded, dataRepresentation.InputType.image,
                                               dataRepresentation.LoadState.unloaded,
                                               dataRepresentation.InputType.empty))
 
-with open(os.path.join(pathToPickle, 'testData.pickle'), 'wb') as f:
+with open(os.path.join(pathToPickle, 'toy_center_new2_testData.pickle'), 'wb') as f:
     pickle.dump(testData, f)
 '''
+

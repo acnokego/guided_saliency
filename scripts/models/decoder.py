@@ -14,6 +14,7 @@ def set_pretrained_weights(net, path_to_model_weights=PATH_TO_VGG16_WEIGHTS):
     vgg16 = cPickle.load(open(path_to_model_weights))
     print ("Loading vgg16 weights ...")
     num_elements_to_set = 26  # Number of W and b elements for the first convolutional layers
+    '''
     layers = ['conv1_1_de', 'conv1_2_de', 'conv2_1_de', 'conv2_2_de', 
                'conv3_1_de', 'conv3_2_de', 'conv3_3_de', 
                 'conv4_1_de', 'conv4_2_de', 'conv4_3_de', 
@@ -24,13 +25,13 @@ def set_pretrained_weights(net, path_to_model_weights=PATH_TO_VGG16_WEIGHTS):
         if len(layers[i]) == 2:
             layers[i][0].set_value(vgg16['param values'][i*2])
             layers[i][1].set_value(vgg16['param values'][i*2+1])
-
-    #lasagne.layers.set_all_param_values(layers.values(), vgg16['param values'][:num_elements_to_set])
+    '''
+    lasagne.layers.set_all_param_values(net['conv5_3_de'], vgg16['param values'][:num_elements_to_set])
 
 
 def build_encoder(net, input_height, input_width):
-    encoder = vgg16.build(net, input_height, input_width)
-    set_pretrained_weights(encoder)
+    encoder = vgg16.build(None, input_height, input_width,connect=False)
+    #set_pretrained_weights(encoder)
     return encoder
 
 
@@ -97,7 +98,7 @@ def build_decoder(net):
     net['uconv2_1_de'] = ConvLayer(net['uconv2_2_de'], 128, 3, pad=1)
     net['uconv2_1_de'].add_param(net['uconv2_1_de'].W, net['uconv2_1_de'].W.get_value().shape, trainable=False)
     net['uconv2_1_de'].add_param(net['uconv2_1_de'].b, net['uconv2_1_de'].b.get_value().shape, trainable=False)
-    print "uconv2_1: {}".format(net['uconv2_1_de'].output_shape[1:])
+    print "uconv2_1_de: {}".format(net['uconv2_1_de'].output_shape[1:])
 
     net['upool1_de'] = Upscale2DLayer(net['uconv2_1_de'], scale_factor=2)
     print "upool1_de: {}".format(net['upool1_de'].output_shape[1:])
@@ -119,6 +120,7 @@ def build_decoder(net):
 
 
 def build(net, input_height, input_width):
+
     encoder_de = build_encoder(net,input_height, input_width)
     autoencoder = build_decoder(encoder_de)
   #  load_weights(autoencoder['output'], path='gen_', epochtoload=90)

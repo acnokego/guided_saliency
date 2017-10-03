@@ -1,6 +1,7 @@
 from lasagne.layers import Conv2DLayer as ConvLayer
 from lasagne.layers import Pool2DLayer as PoolLayer
 from lasagne.layers import Upscale2DLayer, InputLayer
+from lasagne.layers import ScaleLayer, BiasLayer 
 from lasagne.nonlinearities import sigmoid,tanh
 import lasagne
 import cPickle
@@ -75,12 +76,27 @@ def build_vgg16(inputHeight, inputWidth, input_var):
 
 
 
+# def set_pretrained_weights(net, path_to_model_weights=PATH_TO_VGG16_WEIGHTS):
+#     # Set out weights
+#     vgg16 = cPickle.load(open(path_to_model_weights))
+#     num_elements_to_set = 26  # Number of W and b elements for the first convolutional layers
+#     lasagne.layers.set_all_param_values(net['conv5_3'], vgg16['param values'][:num_elements_to_set])
+
 def set_pretrained_weights(net, path_to_model_weights=PATH_TO_VGG16_WEIGHTS):
     # Set out weights
     vgg16 = cPickle.load(open(path_to_model_weights))
+    print ("Loading vgg16 weights ...")
     num_elements_to_set = 26  # Number of W and b elements for the first convolutional layers
-    lasagne.layers.set_all_param_values(net['conv5_3'], vgg16['param values'][:num_elements_to_set])
+    layers = ['conv1_1', 'conv1_2', 'conv2_1', 'conv2_2', 
+               'conv3_1', 'conv3_2', 'conv3_3', 
+                'conv4_1', 'conv4_2', 'conv4_3', 
+                 'conv5_1', 'conv5_2','conv5_3']
+    layers = [ net[k].get_params() for k in layers]
 
+    for i in range(len(layers)):
+        if len(layers[i]) == 2:
+            layers[i][0].set_value(vgg16['param values'][i*2])
+            layers[i][1].set_value(vgg16['param values'][i*2+1])
 
 def build_encoder(input_height, input_width, input_var):
     encoder = build_vgg16(input_height, input_width, input_var)
@@ -140,8 +156,13 @@ def build_decoder(net):
     net['uconv1_1'] = ConvLayer(net['uconv1_2'], 64, 3, pad=1)
     print "uconv1_1: {}".format(net['uconv1_1'].output_shape[1:])
 
-    net['output_encoder'] = ConvLayer(net['uconv1_1'], 3, 1, pad=0,nonlinearity=sigmoid)
+    net['output_encoder'] = ConvLayer(net['uconv1_1'], 3, 1, pad=0,nonlinearity=tanh)
     print "output_encoder: {}".format(net['output_encoder'].output_shape[1:])
+
+    net['output_encoder_bias'] = BiasLayer(net['output_encoder'], b=lasagne.init.Constant(1))
+    print "output_encoder_bias: {}".format(net['output_encoder_bias'].output_shape[1:])
+    net['output_encoder_scaled'] = ScaleLayer(net['output_encoder_bias'], scales=lasagne.init.Constant(127.5))
+    print "output_encoder_scaled: {}".format(net['output_encoder_scaled'].output_shape[1:])
 
     return net
 

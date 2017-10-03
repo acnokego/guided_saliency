@@ -9,7 +9,7 @@ from lasagne.layers import InputLayer
 from layers import RGBtoBGRLayer
 
 
-def build(net, inputHeight, inputWidth):
+def build(net, inputHeight, inputWidth, connect=True, input_var=None):
     """
     Bulid only Convolutional part of the VGG-16 Layer model, all fully connected layers are removed.
     First 3 group of ConvLayers are fixed (not trainable).
@@ -20,10 +20,16 @@ def build(net, inputHeight, inputWidth):
 
  #   net = {'input': InputLayer((None, 3, inputHeight, inputWidth), input_var=input_var)}
  #   print "Input: {}".format(net['input'].output_shape[1:])
+    if connect:
+        net['bgr'] = RGBtoBGRLayer(net['output_encoder_scaled'])
+    else :
+        #print ("build vgg net for content loss")
+        net = {'input': InputLayer((None, 3, inputHeight, inputWidth), input_var=input_var)}
+        net['bgr'] = RGBtoBGRLayer(net['input'])
+        print "Input: {}".format(net['input'].output_shape[1:])
+        
 
-    #net['bgr'] = RGBtoBGRLayer(net['output_encoder'])
-
-    net['conv1_1_de'] = ConvLayer(net['output_encoder'], 64, 3, pad=1, flip_filters=False)
+    net['conv1_1_de'] = ConvLayer(net['bgr'], 64, 3, pad=1, flip_filters=False)
     net['conv1_1_de'].add_param(net['conv1_1_de'].W, net['conv1_1_de'].W.get_value().shape, trainable=False)
     net['conv1_1_de'].add_param(net['conv1_1_de'].b, net['conv1_1_de'].b.get_value().shape, trainable=False)
     print "conv1_1_de: {}".format(net['conv1_1_de'].output_shape[1:])
@@ -75,7 +81,7 @@ def build(net, inputHeight, inputWidth):
     net['conv4_2_de'] = ConvLayer(net['conv4_1_de'], 512, 3, pad=1, flip_filters=False)
     net['conv4_2_de'].add_param(net['conv4_2_de'].W, net['conv4_2_de'].W.get_value().shape, trainable=False)
     net['conv4_2_de'].add_param(net['conv4_2_de'].b, net['conv4_2_de'].b.get_value().shape, trainable=False)
-    print "conv4_2: {}".format(net['conv4_2_de'].output_shape[1:])
+    print "conv4_2_de: {}".format(net['conv4_2_de'].output_shape[1:])
 
     net['conv4_3_de'] = ConvLayer(net['conv4_2_de'], 512, 3, pad=1, flip_filters=False)
     net['conv4_3_de'].add_param(net['conv4_3_de'].W, net['conv4_3_de'].W.get_value().shape, trainable=False)

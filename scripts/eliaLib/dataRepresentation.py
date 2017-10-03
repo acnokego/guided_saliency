@@ -117,10 +117,8 @@ class ImageContainer:
 #         self.saliency = ImageContainer(saliencyPath, saliencyType, saliencyState)
 
 class Target():
-    def __init__(self, imagePath, saliencyPath,fixationPath,
+    def __init__(self, imagePath, saliencyPath,
                  imageState=LoadState.unloaded, imageType=InputType.image,
-                 saliencyState=LoadState.unloaded, saliencyType=InputType.saliencyMapMatlab,
-                 fixationState=LoadState.unloaded, fixationType=InputType.fixationMapMatlab):
+                 saliencyState=LoadState.unloaded, saliencyType=InputType.saliencyMapMatlab):
         self.image = ImageContainer(imagePath, imageType, imageState)
         self.saliency = ImageContainer(saliencyPath, saliencyType, saliencyState)
-        self.fixation = ImageContainer(fixationPath, fixationType, fixationState)
