@@ -30,3 +30,9 @@ THEANO_FLAGS=mode=FAST_RUN,device=gpu,floatX= float32,dnn.enabled=True,cuda.root
 ```
 
 Download the pretrained salGAN weights: [salGAN Generator](https://imatge.upc.edu/web/sites/default/files/resources/1720/saliency/2017-salgan/gen_modelWeights0090.npz)
+
+
+References
+---
+
+The coding structure is referred to[saliency-SALGAN-2017](https://github.com/acnokego/saliency-salgan-2017)
