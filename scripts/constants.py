@@ -10,7 +10,6 @@ pathToImages = '/home/yuandy/COCO_dataset/train_images/images'
 pathToMaps = '/home/yuandy/saliency-salgan-2017/128_32_2down_COCO_prediction'
 pathToTestMaps = '/home/yuandy/COCO_dataset/guided_saliency_gaussian_5_test_new'
 
-
 # Path to geometry toy data
 #pathToImages = '/home/yuandy/saliency-salgan-2017/geo_train'
 #pathToMaps = '/home/yuandy/saliency-salgan-2017/geometry_sal_nocenter_new2'

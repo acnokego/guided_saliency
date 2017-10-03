@@ -10,6 +10,7 @@ import numpy as np
 import pickle
 from constants import *
 
+
 MEAN_VALUES = np.array([104, 117, 123])
 # Note: tweaked to use average pooling instead of maxpooling
 def build_model(height, width, input_var):

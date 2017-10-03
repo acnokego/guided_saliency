@@ -8,7 +8,6 @@ from lasagne.layers import Pool2DLayer as PoolLayer
 from lasagne.layers import InputLayer
 from layers import RGBtoBGRLayer
 
-
 def build(net, inputHeight, inputWidth, connect=True, input_var=None):
     """
     Bulid only Convolutional part of the VGG-16 Layer model, all fully connected layers are removed.

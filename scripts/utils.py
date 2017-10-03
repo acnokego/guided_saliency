@@ -8,7 +8,6 @@ import glob
 from tqdm import tqdm
 from constants import HOME_DIR, WEIGHTS_DIR,TEST_DIR
 
-
 def merge(images, saliency, size):
     """merge images to one image"""
     h, w = images.shape[1], images.shape[2]

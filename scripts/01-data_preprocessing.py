@@ -16,6 +16,7 @@ from tqdm import tqdm
 from eliaLib import dataRepresentation
 from constants import *
 
+
 img_size = INPUT_SIZE
 salmap_size = INPUT_SIZE
 

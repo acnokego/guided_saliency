@@ -11,7 +11,6 @@ from models.autoencoder import autoencoder
 
 
 
-
 def test(path_to_images, path_to_saliency, path_output_imgs, model_to_test=None):
     list_img_files = [k.split('/')[-1].split('.')[0] for k in glob.glob(os.path.join(path_to_saliency, '*'))]
     # Load Data

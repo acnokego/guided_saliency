@@ -8,7 +8,6 @@ import vgg16
 from constants import PATH_TO_VGG16_WEIGHTS
 #from utils import *
 
-
 def set_pretrained_weights(net, path_to_model_weights=PATH_TO_VGG16_WEIGHTS):
     # Set out weights
     vgg16 = cPickle.load(open(path_to_model_weights))

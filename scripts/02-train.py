@@ -20,6 +20,7 @@ from utils import *
 import models.style_transfer as style
 import matplotlib.pyplot as plt
 
+
 flag = str(sys.argv[1])
 
 def autoencoder_batch_iterator(model, train_data):

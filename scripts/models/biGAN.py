@@ -6,6 +6,7 @@ import style_transfer as style
 from autoencoder import autoencoder 
 import random
 
+
 def transform(im):
     return (im/127.5)-1
 

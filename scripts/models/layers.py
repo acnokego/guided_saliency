@@ -3,6 +3,7 @@ import numpy as np
 import theano
 
 
+
 class RGBtoBGRLayer(lasagne.layers.Layer):
     def __init__(self, l_in, bgr_mean=np.array([103.939, 116.779, 123.68]),
                  data_format='bc01', **kwargs):

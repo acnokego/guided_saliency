@@ -8,7 +8,6 @@ import style_transfer as style
 import vgg16
 from constants import INPUT_SIZE
 
-
 def build_autoencoder(encoder, input_height, input_width):
      autoencoder = decoder.build(encoder, input_height, input_width)
      return autoencoder
