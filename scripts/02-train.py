@@ -122,54 +122,10 @@ def autoencoder_batch_iterator_separate(model, train_data):
         if current_epoch % 3 == 0:
             np.savez('/' + DIR_TO_SAVE + '/auto_modelWeights{:04d}.npz'.format(current_epoch),
                      *lasagne.layers.get_all_param_values(model.encoder['output_encoder']))
-            #predict(model=model, image_stimuli=validation_sample, numEpoch=current_epoch, pathOutputMaps=DIR_TO_SAVE)
-        #if current_epoch % 1 == 0:
-         #   file_to_save = '{:04d}eps'.format(current_epoch)
-          #  test_batch(path_to_images='/media/yuandy/COCO_dataset/train_images/images', path_to_saliency='/media/yuandy/COCO_dataset/temp_test_max1.5', name=file_to_save, model=model)
         print 'Epoch:', current_epoch, ' train_loss->', (l2_cost)
         if current_epoch % 10 == 0:
             np.savez(LOSS_TO_SAVE, loss)
-    '''
-    
-    print("Start Fine-tuning...")
 
-    loss = np.empty(0)
-
-    fine_tune_epochs = 100
-
-    for current_epoch in tqdm(range(fine_tune_epochs), ncols=20):
-        content_cost = 0;
-        random.shuffle(train_data)
-        for currChunk in chunks(train_data, model.batch_size):
-
-            if len(currChunk) != model.batch_size:
-                continue
-            batch_input = np.asarray([np.append(x.image.data.astype(theano.config.floatX).transpose(2, 0, 1),
-                                     x.saliency.data.astype(theano.config.floatX).reshape(1,INPUT_SIZE[1],
-                                    INPUT_SIZE[0]),axis=0) for x in currChunk],dtype=theano.config.floatX)
-            #batch_input = np.asarray([x.image.data.astype(theano.config.floatX).transpose(2, 0, 1)
-             #                         for x in currChunk],dtype=theano.config.floatX)
-            batch_input_imgs = np.asarray([style.prep_image(x.image.data).astype(theano.config.floatX) 
-                                           for x in currChunk], dtype=theano.config.floatX)
-
-            c_loss = model.content_trainFunction(batch_input, batch_input_imgs)
-            content_cost += c_loss
-        
-        content_cost /= nr_batches_train
-        if current_epoch % 3 == 0:
-            np.savez('/' + DIR_TO_SAVE + '/auto_finetune_modelWeights{:04d}.npz'.format(current_epoch),
-                     *lasagne.layers.get_all_param_values(model.net['output_encoder']))
-            #predict(model=model, image_stimuli=validation_sample, numEpoch=current_epoch, pathOutputMaps=DIR_TO_SAVE)
-        print 'Epoch:', current_epoch, ' train_loss->', (content_cost)
-        loss = np.append(loss, content_cost)
-
-        if current_epoch % 10 == 0:
-            #plt.xlabel('epochs')
-            #plt.ylabel('loss')
-            #plt.plot(loss)
-            #plt.savefig('./loss_curve.png', loss)
-            np.savez('./loss_content_1layer.npz', loss)
-      ''' 
 def biGAN_batch_iterator(model, train_data, real_data):
     num_epochs = 30001
     nr_batches_train = int(len(train_data) / model.batch_size)
@@ -190,75 +146,6 @@ def biGAN_batch_iterator(model, train_data, real_data):
         G_cost = []
         D_cost = []
 
-        #random.shuffle(train_data)
-        #random.shuffle(real_data)
-        
-        #real_data_temp = real_data[:len(train_data)]
-
-        #discri_run = 0
-        #if generator_updates%(nr_batches_train) == 0:
-        #    batches_G = iterate_minibatches(train_data, model.batch_size, False)
-        '''
-        for currChunk, realChunk in zip(chunks(train_data, model.batch_size), chunks(real_data_temp, model.batch_size)):
-
-            if len(currChunk) != model.batch_size:
-                continue
-            noise_image = np.random.random((128,128,3))*255
-            """
-            batch_input = np.asarray([np.append(x.image.data.astype(theano.config.floatX).transpose(2, 0, 1),
-                                      x.saliency.data.astype(theano.config.floatX).reshape(1,INPUT_SIZE[1],
-                                    INPUT_SIZE[0]),axis=0) for x in currChunk],
-                                     dtype=theano.config.floatX)
-            """
-            batch_input = np.asarray([np.append(noise_image.transpose(2, 0, 1),
-                                      x.saliency.data.astype(theano.config.floatX).reshape(1,INPUT_SIZE[1],
-                                    INPUT_SIZE[0]),axis=0) for x in currChunk],
-                                     dtype=theano.config.floatX)
-
-            #BGR input image 
-            #batch_input_imgs = np.asarray([(x.image.data).astype(theano.config.floatX).transpose(2,0,1) 
-            #                               for x in currChunk], dtype=theano.config.floatX)
-            batch_output = np.asarray([y.saliency.data.astype(theano.config.floatX) / 255. for y in currChunk],
-                                      dtype=theano.config.floatX)
-            batch_output = np.expand_dims(batch_output, axis=1)
-            
-            """
-            batch_real_input = np.asarray([np.append(x.image.data.astype(theano.config.floatX).transpose(2, 0, 1)                                   ,x.saliency.data.astype(theano.config.floatX).reshape(1,INPUT_SIZE[1],
-                                    INPUT_SIZE[0]),axis=0) for x in realChunk],
-                                     dtype=theano.config.floatX)
-            """
-            batch_real_input = np.asarray([x.image.data.astype(theano.config.floatX).transpose(2, 0, 1)                                                     for x in realChunk],
-                                        dtype=theano.config.floatX)
-            """
-            # train generator with one batch and discriminator with next batch
-            if n_updates % 2 == 0  :
-                #auto_loss = model.autoencoder.G_trainFunction(batch_input, batch_output, batch_input_imgs)
-                #auto_loss = model.autoencoder.G_trainFunction(batch_input, batch_output)
-                #auto_cost += auto_loss
-                #G_loss = model.G_train_fn(batch_input, batch_input,batch_output)
-                G_loss = model.G_train_fn(batch_input)
-                G_cost[0] += G_loss[0]
-                G_cost[1] += G_loss[1]
-            else:
-               # G_obj, D_obj, G_cost = model.D_trainFunction(batch_input, batch_output)
-               # GAN_loss = model.train_fn(batch_input, batch_real_input)
-               # GAN_cost[0] += GAN_loss[0]
-               # GAN_cost[1] += GAN_loss[1]
-                D_loss = model.D_train_fn(batch_input, batch_real_input)
-                D_cost += D_loss
-
-            n_updates += 1
-            """
-        '''
-            # below code is for wGAN
-            # for each epoch 
-            # discriminator is updated 5 time before generator update 1 times
-            # for the first 25 generator update and for every 500 generator
-            # updates, the discriminator is update 100 times instead
-            #
-        #if (generator_updates < 25 ) or (generator_updates % 500 == 0):
-        #    discri_run = 50
-    
         #else:
         #    discri_run = 5
         
@@ -267,12 +154,6 @@ def biGAN_batch_iterator(model, train_data, real_data):
             batch = next(batches_D)
             batch_real = next(batches_real)
             noise_image = np.random.random((128,128,3))*255
-            '''
-            batch_input = np.asarray([(np.append(noise_image.transpose(2, 0, 1),
-                                      x.saliency.data.astype(theano.config.floatX).reshape(1,INPUT_SIZE[1],
-                                    INPUT_SIZE[0]),axis=0)) for x in batch],
-                                     dtype=theano.config.floatX)
-            '''   
             
             batch_input = np.asarray([np.append(x.image.data.astype(theano.config.floatX).transpose(2, 0, 1),
                                       x.saliency.data.astype(theano.config.floatX).reshape(1,INPUT_SIZE[1],
@@ -335,15 +216,6 @@ def biGAN_batch_iterator(model, train_data, real_data):
             
 
 
-        #auto_cost /= nr_batches_train
-        '''
-        G_cost[0] /= nr_batches_train
-        G_cost[1] /= nr_batches_train
-        D_cost /= nr_batches_train
-        '''
-        #G_cost[0] /= generator_updates
-        #G_cost[1] /= generator_updates
-        #D_cost /= (nr_batches_train-generator_updates)
 
     
         # Save weights every 3 epoch
@@ -351,8 +223,6 @@ def biGAN_batch_iterator(model, train_data, real_data):
             np.savez('/' + DIR_TO_SAVE + '/biGAN_G_modelWeights{:04d}.npz'.format(current_epoch),
                      *lasagne.layers.get_all_param_values(model.autoencoder.encoder['output_encoder']))
 
-           # np.savez('/' + DIR_TO_SAVE + '/biGAN_D_modelWeights{:04d}.npz'.format(current_epoch),
-           #          *lasagne.layers.get_all_param_values(model.D))
         if current_epoch % 200 == 0:
             file_to_save = '{:04d}eps'.format(current_epoch)
             test_batch(path_to_images='/home/yuandy/COCO_dataset/train_images/images', path_to_saliency='/home/yuandy/COCO_dataset/temp_test_max1.5', name=file_to_save, model=model)
@@ -382,21 +252,6 @@ def train():
         real_data = pickle.load(f)
     print '-->done!'
     
-    '''
-    print 'Loading validation data...'
-    with open('/home/yuandy/salicon_data/processed_data/320x240/validationData.pickle', 'rb') as f:
-    # with open(VALIDATION_DATA_DIR, 'rb') as f:
-        validation_data = pickle.load(f)
-    print '-->done!'
-    '''
-    # Choose a random sample to monitor the training
-    '''
-    num_random = random.choice(range(len(validation_data)))
-    validation_sample = validation_data[num_random]
-    cv2.imwrite('./' + DIR_TO_SAVE + '/validationRandomSaliencyGT.png', validation_sample.saliency.data)
-    cv2.imwrite('./' + DIR_TO_SAVE + '/validationRandomImage.png', cv2.cvtColor(validation_sample.image.data,
-                                                                             cv2.COLOR_RGB2BGR))
-    '''
 
     # Create network
     if flag == 'auto':
@@ -416,21 +271,5 @@ def train():
         biGAN_batch_iterator(model, train_data, real_data)
     else :
         print ('argument lost...')
-    '''
-    if flag == 'salgan':
-        model = ModelSALGAN(INPUT_SIZE[0], INPUT_SIZE[1])
-        # Load a pre-trained model
-        # load_weights(net=model.net['output'], path="nss/gen_", epochtoload=15)
-        # load_weights(net=model.discriminator['fc5'], path="test_dialted/disrim_", epochtoload=54)
-        salgan_batch_iterator(model, train_data, validation_sample.image.data)
-
-    elif flag == 'bce':
-        model = ModelBCE(INPUT_SIZE[0], INPUT_SIZE[1])
-        # Load a pre-trained model
-        # load_weights(net=model.net['output'], path='test/gen_', epochtoload=15)
-        bce_batch_iterator(model, train_data, validation_sample.image.data)
-    else:
-        print "Invalid input argument."
-    '''
 if __name__ == "__main__":
     train()

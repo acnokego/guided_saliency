@@ -1,5 +1,6 @@
 # Work space directory
 HOME_DIR = '/home/yuandy/guided_saliency/'
+# Dir to save weights
 WEIGHTS_DIR = '/home/yuandy/guided_saliency/weights/'
 #dir to save validation result
 TEST_DIR = '/home/yuandy/guided_saliency/test/bigan_all_test22'
@@ -21,12 +22,6 @@ pathOutputImages = '/home/yuandy/COCO_dataset/processed_data/images256x192'
 pathOutputMaps = '/home/yuandy/COCO_dataset/processed_data/saliency256x192'
 pathOutputTestImages = '/home/yuandy/COCO_dataset/processed_data/imagesTest256x192'
 pathOutputTestMaps = '/home/yuandy/COCO_dataset/processed_data/saliencyTest256x192'
-'''
-pathOutputImages = '/home/yuandy/COCO_dataset/processed_data/toy_images256x192'
-pathOutputMaps = '/home/yuandy/COCO_dataset/processed_data/toy_saliency256x192'
-pathOutputTestImages = '/home/yuandy/COCO_dataset/processed_data/toy_imagesTest256x192'
-pathOutputTestMaps = '/home/yuandy/COCO_dataset/processed_data/toy_saliencyTest256x192'
-'''
 pathToPickle = '/home/yuandy/COCO_dataset/processed_data/128x128'
 
 # Path to pickles which contains processed data
@@ -41,9 +36,7 @@ PATH_TO_VGG16_WEIGHTS = '/home/yuandy/guided_saliency/scripts/vgg16.pkl'
 # (WIDTH, HEIGHT)
 #INPUT_SIZE = (256, 192)
 INPUT_SIZE = (128, 128)
+#Dir to save loss curve
 LOSS_TO_SAVE = './loss_bigan_all_test22.npz'
-#LOSS_TO_SAVE = './loss_bigan_test6_norm.npz'
-# Directory to keep snapshots
-#DIR_TO_SAVE = 'home/yuandy/guided_saliency/weights_0.00001_biGAN'
+# Directory to save results during training
 DIR_TO_SAVE = 'home/yuandy/guided_saliency/weights/weights_bigan_all_test22'
-#DIR_TO_SAVE = 'media/yuandy/weights/weights_bigan_test6_norm'

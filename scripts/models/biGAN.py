@@ -122,8 +122,9 @@ class biGAN(object):
             + lasagne.objectives.binary_crossentropy(fake_out, self.false_label)).mean()
         '''
 
-        
-        # for wGAN
+        """
+         for wGAN
+        """
         ## minimize(-fake)
         generator_loss_1 = fake_out.mean()
         generator_loss = generator_loss_1 + lam*combine_obj
@@ -165,20 +166,6 @@ class biGAN(object):
             updates2[param] = T.clip(updates2[param],-self.clip, self.clip)
 
 
-        updates3 = lasagne.updates.adam(
-            combine_obj, G_params, learning_rate=eta, beta1=0.5)
-
- #print("updates after",updates)
-        '''
-        self.train_fn = theano.function(inputs=[self.input_var1, self.input_var2],
-                                outputs=[(real_out > .5).mean(),
-                                (fake_out < .5).mean()],
-                                                 updates=updates)
-        '''
-        self.temp_train = theano.function(inputs=[self.input_var1,self.output_var],
-                                          outputs=[combine_obj],
-                                          updates=updates3,
-                                          allow_input_downcast=True)
 
         self.G_train_fn = theano.function(inputs=[self.input_var1, self.input_var2, self.output_var],
                                 outputs=[generator_loss_1, real_out.mean(), fake_out.mean(), generator_loss-generator_loss_1],

@@ -23,11 +23,9 @@ class autoencoder(object):
         self.input_img = T.tensor4()
         print('building autoencoder.......')
         ##self.net
-        #self.decoder = decoder.build(self.inputWidth, self.inputHeight, self.input_var)
         self.encoder = encoder.build(self.inputHeight, self.inputWidth, self.input_var)
         self.decoder = decoder.build(None, self.inputHeight, self.inputWidth)
 
-        #self.net = self.encoder
         '''
         #self.net = build_autoencoder(self.encoder, INPUT_SIZE[1], INPUT_SIZE[0])
         #self.vgg_net = vgg16.build(None, self.inputHeight, self.inputWidth, False, self.input_img)
@@ -59,8 +57,6 @@ class autoencoder(object):
         obj = lasagne.objectives.squared_error(prediction_pooled, 
             output_var_pooled).sum()
         
-        #+ lasagne.regularization.regularize_network_params(
-        #    self.net[generated_layer_name],lasagne.regularization.l2)
 
         train_err = obj
 
@@ -74,8 +70,9 @@ class autoencoder(object):
         self.G_trainFunction = theano.function(inputs=[self.input_var, self.output_var]
                             , outputs=train_err, updates= G_updates, allow_input_downcast=True)
         '''
+
+
         # content feature extraction
-        #feature_layers = ['conv4_2_s']
         
         feature_layers = ['conv4_2_de', 'conv3_1_de', 'conv2_1_de']
    #     feature_layers_2 = 'conv5_2_s'
